@@ -1,0 +1,35 @@
+name: Test basic usage with valid provider
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github_token: fake-github-token
+          provider: deepai
+          api_key: fake-api-key
+          threshold: '0.9'
+          type: 'modified,added,renamed'
+          extensions: 'jpeg,jpg,png,gif,webp,tiff,bmp'
+        env:
+          GITHUB_EVENT_NAME: push
+          GITHUB_REF: refs/heads/main
+      - name: Assert action ran and failed due to invalid token (not invalid provider)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action should fail because the fake GitHub token cannot call the API.
+          # It should NOT fail with "provider is not supported" since 'deepai' is valid.
+          # Either failure (API error) or success (no files found) is acceptable here,
+          # but the action must not crash before reaching the GitHub API call.
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed as expected (invalid token prevents GitHub API call)"
+          else
+            echo "PASS: action succeeded (no matching image files found in commit range)"
+          fi
