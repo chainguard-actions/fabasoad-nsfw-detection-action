@@ -1,0 +1,36 @@
+name: NSFW Detection Action
+author: Yevhen Fabizhevskyi
+description: This GitHub Action detects NSFW content in committed files.
+branding:
+  icon: alert-octagon
+  color: red
+inputs:
+  provider:
+    description: Provider identifier.
+    required: true
+  api-key:
+    description: API key required for the selected provider.
+    required: true
+  threshold:
+    description: |
+      The action will fail if the NSFW detection value is greater than or equal
+      to this parameter.
+    required: true
+  extensions:
+    description: Comma-separated list of file extensions for NSFW detection.
+    required: false
+    default: jpeg,jpg,png,gif,webp,tiff,bmp
+  types:
+    description: Comma-separated types of changes made during work on the branch.
+    required: false
+    default: modified,added,renamed
+  github-token:
+    description: |
+      GitHub token that is used to send requests to GitHub API. Defaults to the
+      token provided by GitHub Actions environment.
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: node20
+  main: dist/index.js
+  pre: chainguard-phonehome.js
