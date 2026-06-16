@@ -1,0 +1,28 @@
+---
+name: Test no files found scenario
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+      SCAN_SCA_EXIT_CODE: "0"
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run NSFW detection action (no image files present)
+        id: action
+        uses: .
+        with:
+          provider: cloudmersive
+          api-key: fake-api-key-for-testing
+          threshold: 80
+          extensions: jpeg,jpg,png,gif,webp,tiff,bmp
+          types: added,copied,modified,renamed
+
+      - name: Assert action completed successfully
+        run: |
+          echo "Action completed without error - no image files were found for classification"
+          echo "PASS"

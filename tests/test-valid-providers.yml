@@ -1,0 +1,52 @@
+---
+name: Test valid provider options
+on:
+  workflow_dispatch:
+jobs:
+  test-picpurify:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+      SCAN_SCA_EXIT_CODE: "0"
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run NSFW detection action with picpurify provider
+        id: action-picpurify
+        uses: .
+        with:
+          provider: picpurify
+          api-key: fake-api-key-for-testing
+          threshold: 90
+          extensions: jpeg,jpg,png
+          types: added,modified
+
+      - name: Assert picpurify provider accepted
+        run: |
+          echo "picpurify provider was accepted by validation"
+          echo "PASS"
+
+  test-sightengine:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+      SCAN_SCA_EXIT_CODE: "0"
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run NSFW detection action with sightengine provider
+        id: action-sightengine
+        uses: .
+        with:
+          provider: sightengine
+          api-key: fake-api-key-for-testing
+          threshold: 75
+          extensions: jpeg,jpg,png,gif
+          types: added
+
+      - name: Assert sightengine provider accepted
+        run: |
+          echo "sightengine provider was accepted by validation"
+          echo "PASS"
