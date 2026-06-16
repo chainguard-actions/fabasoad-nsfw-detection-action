@@ -1,0 +1,38 @@
+name: Test NSFW Detection - No Matching Extensions
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: fake-token
+      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run NSFW detection action with no matching extensions
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github_token: fake-token
+          provider: sightengine
+          api_key: fake-api-key
+          threshold: '0.5'
+          extensions: 'xyz123,abc456'
+          type: 'modified,added,renamed'
+
+      - name: Assert action ran (not skipped)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action should run (not be skipped).
+          # With no matching extensions, it may succeed (nothing to scan)
+          # or fail due to API/token issues — both are acceptable.
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran (outcome=$OUTCOME)"

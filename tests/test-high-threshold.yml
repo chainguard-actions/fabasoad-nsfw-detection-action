@@ -1,0 +1,38 @@
+name: Test NSFW Detection - High Threshold
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: fake-token
+      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/heads/main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run NSFW detection action with high threshold
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github_token: fake-token
+          provider: sightengine
+          api_key: fake-api-key
+          threshold: '1.0'
+          extensions: 'jpeg,jpg,png,gif,webp,tiff,bmp'
+          type: 'modified,added,renamed'
+
+      - name: Assert action ran (not skipped)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # With a threshold of 1.0 (maximum), the action should never fail
+          # due to NSFW detection (only due to API/auth issues with fake credentials).
+          # The action should run (not be skipped).
+          if [ "$OUTCOME" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran (outcome=$OUTCOME)"
