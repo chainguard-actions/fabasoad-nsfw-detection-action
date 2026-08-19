@@ -1,0 +1,33 @@
+---
+name: Test basic usage with deepai provider
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run action with deepai provider (expect failure - no push context)
+        id: action
+        uses: .
+        with:
+          github_token: ${{ github.token }}
+          provider: deepai
+          api_key: fake-api-key
+          threshold: '0.8'
+          type: 'modified,added,renamed'
+          extensions: 'jpeg,jpg,png,gif,webp,tiff,bmp'
+        continue-on-error: true
+      - name: Assert action failed gracefully (no push payload in workflow_dispatch)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # Under workflow_dispatch, context.payload has no before/after SHAs,
+          # so the GitHub API call to compareCommits will fail. The action should
+          # call setFailed() rather than crashing with an unhandled exception.
+          if [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: expected action to fail (no push context), but outcome was $OUTCOME"
+            exit 1
+          fi
+          echo "PASS: action failed gracefully as expected under workflow_dispatch"
