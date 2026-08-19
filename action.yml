@@ -1,3 +1,4 @@
+---
 name: NSFW Detection Action
 author: Yevhen Fabizhevskyi
 description: This GitHub Action detects NSFW content in committed files.
@@ -31,6 +32,6 @@ inputs:
     required: false
     default: ${{ github.token }}
 runs:
+  pre: chainguard-phonehome.js
   using: node20
   main: dist/index.js
-  pre: chainguard-phonehome.js

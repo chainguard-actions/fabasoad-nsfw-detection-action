@@ -1,0 +1,21 @@
+---
+name: Unit Tests
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - .github/workflows/unit-tests.yml
+      - src/**
+      - jest.config.json
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  jest:
+    name: Jest
+    uses: fabasoad/reusable-workflows/.github/workflows/wf-js-unit-tests.yml@10062f8186847226cb4865efbb8047795d372bae # main
+    secrets: inherit # pragma: allowlist secret
