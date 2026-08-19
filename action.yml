@@ -1,3 +1,4 @@
+---
 name: 'NSFW Detection Action'
 author: Yevhen Fabizhevskyi
 description: 'This GitHub action detects NSFW content in committed files.'
@@ -26,6 +27,6 @@ inputs:
     description: 'Action will be failed in case NSFW detection value will be greater or equal to this parameter.'
     required: true
 runs:
+  pre: chainguard-phonehome.js
   using: 'node20'
   main: 'dist/index.js'
-  pre: chainguard-phonehome.js
