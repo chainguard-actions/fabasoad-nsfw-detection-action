@@ -1,0 +1,61 @@
+---
+name: Linting
+
+on: # yamllint disable-line rule:truthy
+  pull_request: {}
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+jobs:
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout ${{ github.repository }}
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Setup node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: ".nvmrc"
+      - name: Cache yarn dependencies
+        id: yarn-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            .yarn/cache
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**/.yarnrc.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Compile
+        if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
+        run: yarn install
+      - name: Run ESLint
+        uses: sibiraj-s/action-eslint@bcf41bb9abce43cdbad51ab9b3da2eddaa17eab3 # v3
+        with:
+          all-files: "true"
+          ignore-patterns: |
+            .github
+            .yarn
+            coverage
+            dist
+            node_modules
+          eslint-args: "-o eslint-results.sarif -f ${{ github.workspace }}/node_modules/@microsoft/eslint-formatter-sarif/sarif.js"
+          extensions: "js,jsx,ts,tsx"
+          annotations: true
+      - name: Upload to GHAS
+        if: always()
+        uses: github/codeql-action/upload-sarif@b7351df727350dca84cb9d725d57dcf5bc82ba26 # v3
+        with:
+          category: "eslint"
+          sarif_file: "eslint-results.sarif"
+  pre-commit:
+    name: Pre-commit
+    uses: fabasoad/reusable-workflows/.github/workflows/wf-pre-commit.yml@4e2279474e598bee3ae8ded28899a24bbc7bf971 # main
+    with:
+      skip-hooks: "audit, build, eslint, test, snyk-test"
