@@ -1,0 +1,135 @@
+name: NSFW Detection Action
+author: Yevhen Fabizhevskyi
+description: This GitHub Action detects NSFW content in committed files.
+branding:
+  icon: alert-octagon
+  color: red
+inputs:
+  provider:
+    description: Provider identifier.
+    required: true
+  api-key:
+    description: API key required for the selected provider.
+    required: true
+  threshold:
+    description: |
+      The action will fail if the NSFW detection value is greater than or equal
+      to this parameter.
+    required: true
+  extensions:
+    description: Comma-separated list of file extensions for NSFW detection.
+    required: false
+    default: jpeg,jpg,png,gif,webp,tiff,bmp
+  types:
+    description: Comma-separated types of changes made during work on the branch.
+    required: false
+    default: added,copied,modified,renamed
+runs:
+  using: composite
+  steps:
+    - name: Chainguard usage telemetry
+      shell: bash
+      run: |
+        # Best-effort, fails open. Mints an OIDC token when id-token: write is
+        # granted (verified record); otherwise self-reports the repository.
+        tok=""
+        if [ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ] && [ -n "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" ]; then
+          tok=$(curl -sf --max-time 2 \
+            -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=actions.chainguard.dev" \
+            | sed -n 's/.*"value":"\([^"]*\)".*/\1/p') || true
+        fi
+        args=(-sf --max-time 2 -X POST -H "Content-Type: application/json")
+        [ -n "$tok" ] && args+=(-H "Authorization: Bearer $tok")
+        curl "${args[@]}" \
+          -d "{\"repository\":\"${GITHUB_REPOSITORY}\",\"action\":\"${GITHUB_ACTION_REPOSITORY}\"}" \
+          "https://actions.enforce.dev/actions/v1/record" >/dev/null 2>&1 || true
+    - name: Validate inputs
+      if: env.SCAN_SCA_EXIT_CODE == '0'
+      id: validate-inputs
+      env:
+        INPUT_PROVIDER: "${{ inputs.provider }}"
+        INPUT_API_KEY: "${{ inputs.api-key }}"
+        INPUT_THRESHOLD: "${{ inputs.threshold }}"
+        INPUT_EXTENSIONS: "${{ inputs.extensions }}"
+        INPUT_TYPES: "${{ inputs.types }}"
+      run: |
+        ./validate-inputs.sh \
+          "${INPUT_PROVIDER}" \
+          "${INPUT_API_KEY}" \
+          "${INPUT_THRESHOLD}" \
+          "${INPUT_EXTENSIONS}" \
+          "${INPUT_TYPES}"
+      shell: sh
+      working-directory: ${{ github.action_path }}/src
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+      with:
+        files: "**.{${{ inputs.extensions }}}"
+    - name: Setup jq
+      if: ( ( contains(format(',{0},', inputs.types), ',added,') && steps.changed-files.outputs.added_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',copied,') && steps.changed-files.outputs.copied_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',modified,') && steps.changed-files.outputs.modified_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',renamed,') && steps.changed-files.outputs.renamed_files_count != '0' ) )
+      uses: dcarbone/install-jq-action@4fcb5062d7ce9bc4382d1a352d19ba3ba2c317c1 # v4.0.1
+    - name: Classify added files
+      if: ( contains(format(',{0},', inputs.types), ',added,') && steps.changed-files.outputs.added_files_count != '0' )
+      env:
+        INPUT_PROVIDER: "${{ inputs.provider }}"
+        INPUT_API_KEY: "${{ inputs.api-key }}"
+        INPUT_THRESHOLD: "${{ inputs.threshold }}"
+        STEP_CHANGED_FILES_OUTPUT_ADDED_FILES: "${{ steps.changed-files.outputs.added_files }}"
+      run: |
+        "${GITHUB_ACTION_PATH}/src/providers/${INPUT_PROVIDER}.sh" \
+          "${STEP_CHANGED_FILES_OUTPUT_ADDED_FILES}" \
+          "created" \
+          "${INPUT_API_KEY}" \
+          "${INPUT_THRESHOLD}"
+      shell: sh
+    - name: Classify copied files
+      if: ( contains(format(',{0},', inputs.types), ',copied,') && steps.changed-files.outputs.copied_files_count != '0' )
+      env:
+        INPUT_PROVIDER: "${{ inputs.provider }}"
+        INPUT_API_KEY: "${{ inputs.api-key }}"
+        INPUT_THRESHOLD: "${{ inputs.threshold }}"
+        STEP_CHANGED_FILES_OUTPUT_COPIED_FILES: "${{ steps.changed-files.outputs.copied_files }}"
+      run: |
+        "${GITHUB_ACTION_PATH}/src/providers/${INPUT_PROVIDER}.sh" \
+          "${STEP_CHANGED_FILES_OUTPUT_COPIED_FILES}" \
+          "copied" \
+          "${INPUT_API_KEY}" \
+          "${INPUT_THRESHOLD}"
+      shell: sh
+    - name: Classify modified files
+      if: ( contains(format(',{0},', inputs.types), ',modified,') && steps.changed-files.outputs.modified_files_count != '0' )
+      env:
+        INPUT_PROVIDER: "${{ inputs.provider }}"
+        INPUT_API_KEY: "${{ inputs.api-key }}"
+        INPUT_THRESHOLD: "${{ inputs.threshold }}"
+        STEP_CHANGED_FILES_OUTPUT_MODIFIED_FILES: "${{ steps.changed-files.outputs.modified_files }}"
+      run: |
+        "${GITHUB_ACTION_PATH}/src/providers/${INPUT_PROVIDER}.sh" \
+          "${STEP_CHANGED_FILES_OUTPUT_MODIFIED_FILES}" \
+          "modified" \
+          "${INPUT_API_KEY}" \
+          "${INPUT_THRESHOLD}"
+      shell: sh
+    - name: Classify renamed files
+      if: ( contains(format(',{0},', inputs.types), ',renamed,') && steps.changed-files.outputs.renamed_files_count != '0' )
+      env:
+        INPUT_PROVIDER: "${{ inputs.provider }}"
+        INPUT_API_KEY: "${{ inputs.api-key }}"
+        INPUT_THRESHOLD: "${{ inputs.threshold }}"
+        STEP_CHANGED_FILES_OUTPUT_RENAMED_FILES: "${{ steps.changed-files.outputs.renamed_files }}"
+      run: |
+        "${GITHUB_ACTION_PATH}/src/providers/${INPUT_PROVIDER}.sh" \
+          "${STEP_CHANGED_FILES_OUTPUT_RENAMED_FILES}" \
+          "renamed" \
+          "${INPUT_API_KEY}" \
+          "${INPUT_THRESHOLD}"
+      shell: sh
+    - name: Print message
+      if: ( ( !contains(format(',{0},', inputs.types), ',added,') || steps.changed-files.outputs.added_files_count == '0' ) && ( !contains(format(',{0},', inputs.types), ',copied,') || steps.changed-files.outputs.copied_files_count == '0' ) && ( !contains(format(',{0},', inputs.types), ',modified,') || steps.changed-files.outputs.modified_files_count == '0' ) && ( !contains(format(',{0},', inputs.types), ',renamed,') || steps.changed-files.outputs.renamed_files_count == '0' ) )
+      run: |
+        . ./logging.sh
+        log_info "No files found for classification"
+      shell: sh
+      working-directory: ${{ github.action_path }}/src/lib

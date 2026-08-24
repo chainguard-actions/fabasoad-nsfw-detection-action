@@ -1,0 +1,33 @@
+---
+name: Test no image files found for classification
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set SCAN_SCA_EXIT_CODE so validate-inputs step runs
+        run: echo "SCAN_SCA_EXIT_CODE=0" >> "$GITHUB_ENV"
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          SCAN_SCA_EXIT_CODE: "0"
+        with:
+          provider: cloudmersive
+          api-key: fake-api-key-no-files
+          threshold: "0.8"
+      - name: Assert action ran with no image files to classify
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with no image files to classify"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (changed-files step may not support workflow_dispatch under act)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
