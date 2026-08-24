@@ -15,6 +15,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v2.0.4 | [`v2.0.4`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/tree/v2.0.4) | [`2c61ec8`](https://github.com/fabasoad/nsfw-detection-action/commit/2c61ec887ff0c98a53721e368ced28f22ceb2c20) |
 | v3.0.0 | [`v3.0.0`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/tree/v3.0.0) | [`4dc1d32`](https://github.com/fabasoad/nsfw-detection-action/commit/4dc1d32529e338c6f997a4a285e4b7086ec501b6) |
 | v3.0.1 | [`v3.0.1`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/tree/v3.0.1) | [`0765793`](https://github.com/fabasoad/nsfw-detection-action/commit/0765793ab34d8864d91bf36d9956dad979463eeb) |
+| v3.0.2 | [`v3.0.2`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/tree/v3.0.2) | [`84dfcb1`](https://github.com/fabasoad/nsfw-detection-action/commit/84dfcb183b5ad70af6506f75223e5b6783e9c7d4) |
 
 ## Privacy
 
