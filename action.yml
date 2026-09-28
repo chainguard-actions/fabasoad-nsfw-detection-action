@@ -64,12 +64,12 @@ runs:
       working-directory: ${{ github.action_path }}/src
     - name: Get changed files
       id: changed-files
-      uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+      uses: chainguard-actions/tj-actions-changed-files@25465cfff429d97d0a03620c97f7b699c148b32a # v47.0.6
       with:
         files: "**.{${{ inputs.extensions }}}"
     - name: Setup jq
       if: ( ( contains(format(',{0},', inputs.types), ',added,') && steps.changed-files.outputs.added_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',copied,') && steps.changed-files.outputs.copied_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',modified,') && steps.changed-files.outputs.modified_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',renamed,') && steps.changed-files.outputs.renamed_files_count != '0' ) )
-      uses: dcarbone/install-jq-action@4fcb5062d7ce9bc4382d1a352d19ba3ba2c317c1 # v4.0.1
+      uses: chainguard-actions/dcarbone-install-jq-action@9c5091230f8d415b141d7be4c5f3e5f9a69fd81e # v4.0.1
     - name: Classify added files
       if: ( contains(format(',{0},', inputs.types), ',added,') && steps.changed-files.outputs.added_files_count != '0' )
       env:
