@@ -69,7 +69,7 @@ runs:
         files: "**.{${{ inputs.extensions }}}"
     - name: Setup jq
       if: ( ( contains(format(',{0},', inputs.types), ',added,') && steps.changed-files.outputs.added_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',copied,') && steps.changed-files.outputs.copied_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',modified,') && steps.changed-files.outputs.modified_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',renamed,') && steps.changed-files.outputs.renamed_files_count != '0' ) )
-      uses: chainguard-actions/dcarbone-install-jq-action@9c5091230f8d415b141d7be4c5f3e5f9a69fd81e # v4.0.1
+      uses: chainguard-actions/dcarbone-install-jq-action@2846181a40157881834402cc33a8423440062eac # v4.0.1
     - name: Classify added files
       if: ( contains(format(',{0},', inputs.types), ',added,') && steps.changed-files.outputs.added_files_count != '0' )
       env:
