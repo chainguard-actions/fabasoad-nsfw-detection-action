@@ -1,3 +1,4 @@
+---
 name: NSFW Detection Action
 author: Yevhen Fabizhevskyi
 description: This GitHub Action detects NSFW content in committed files.
@@ -62,16 +63,39 @@ runs:
           "${INPUT_TYPES}"
       shell: sh
       working-directory: ${{ github.action_path }}/src
+
     - name: Get changed files
       id: changed-files
       uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v45
       with:
         files: "**.{${{ inputs.extensions }}}"
+
     - name: Setup jq
-      if: ( ( contains(format(',{0},', inputs.types), ',added,') && steps.changed-files.outputs.added_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',copied,') && steps.changed-files.outputs.copied_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',modified,') && steps.changed-files.outputs.modified_files_count != '0' ) || ( contains(format(',{0},', inputs.types), ',renamed,') && steps.changed-files.outputs.renamed_files_count != '0' ) )
+      if: (
+        (
+        contains(format(',{0},', inputs.types), ',added,')
+        && steps.changed-files.outputs.added_files_count != '0'
+        )
+        || (
+        contains(format(',{0},', inputs.types), ',copied,')
+        && steps.changed-files.outputs.copied_files_count != '0'
+        )
+        || (
+        contains(format(',{0},', inputs.types), ',modified,')
+        && steps.changed-files.outputs.modified_files_count != '0'
+        )
+        || (
+        contains(format(',{0},', inputs.types), ',renamed,')
+        && steps.changed-files.outputs.renamed_files_count != '0'
+        )
+        )
       uses: dcarbone/install-jq-action@b7ef57d46ece78760b4019dbc4080a1ba2a40b45 # v3
+
     - name: Classify added files
-      if: ( contains(format(',{0},', inputs.types), ',added,') && steps.changed-files.outputs.added_files_count != '0' )
+      if: (
+        contains(format(',{0},', inputs.types), ',added,')
+        && steps.changed-files.outputs.added_files_count != '0'
+        )
       env:
         INPUT_PROVIDER: ${{ inputs.provider }}
         INPUT_API_KEY: ${{ inputs.api-key }}
@@ -84,8 +108,12 @@ runs:
           "${INPUT_API_KEY}" \
           "${INPUT_THRESHOLD}"
       shell: sh
+
     - name: Classify copied files
-      if: ( contains(format(',{0},', inputs.types), ',copied,') && steps.changed-files.outputs.copied_files_count != '0' )
+      if: (
+        contains(format(',{0},', inputs.types), ',copied,')
+        && steps.changed-files.outputs.copied_files_count != '0'
+        )
       env:
         INPUT_PROVIDER: ${{ inputs.provider }}
         INPUT_API_KEY: ${{ inputs.api-key }}
@@ -98,8 +126,12 @@ runs:
           "${INPUT_API_KEY}" \
           "${INPUT_THRESHOLD}"
       shell: sh
+
     - name: Classify modified files
-      if: ( contains(format(',{0},', inputs.types), ',modified,') && steps.changed-files.outputs.modified_files_count != '0' )
+      if: (
+        contains(format(',{0},', inputs.types), ',modified,')
+        && steps.changed-files.outputs.modified_files_count != '0'
+        )
       env:
         INPUT_PROVIDER: ${{ inputs.provider }}
         INPUT_API_KEY: ${{ inputs.api-key }}
@@ -112,8 +144,12 @@ runs:
           "${INPUT_API_KEY}" \
           "${INPUT_THRESHOLD}"
       shell: sh
+
     - name: Classify renamed files
-      if: ( contains(format(',{0},', inputs.types), ',renamed,') && steps.changed-files.outputs.renamed_files_count != '0' )
+      if: (
+        contains(format(',{0},', inputs.types), ',renamed,')
+        && steps.changed-files.outputs.renamed_files_count != '0'
+        )
       env:
         INPUT_PROVIDER: ${{ inputs.provider }}
         INPUT_API_KEY: ${{ inputs.api-key }}
@@ -126,8 +162,26 @@ runs:
           "${INPUT_API_KEY}" \
           "${INPUT_THRESHOLD}"
       shell: sh
+
     - name: Print message
-      if: ( ( !contains(format(',{0},', inputs.types), ',added,') || steps.changed-files.outputs.added_files_count == '0' ) && ( !contains(format(',{0},', inputs.types), ',copied,') || steps.changed-files.outputs.copied_files_count == '0' ) && ( !contains(format(',{0},', inputs.types), ',modified,') || steps.changed-files.outputs.modified_files_count == '0' ) && ( !contains(format(',{0},', inputs.types), ',renamed,') || steps.changed-files.outputs.renamed_files_count == '0' ) )
+      if: (
+        (
+        !contains(format(',{0},', inputs.types), ',added,')
+        || steps.changed-files.outputs.added_files_count == '0'
+        )
+        && (
+        !contains(format(',{0},', inputs.types), ',copied,')
+        || steps.changed-files.outputs.copied_files_count == '0'
+        )
+        && (
+        !contains(format(',{0},', inputs.types), ',modified,')
+        || steps.changed-files.outputs.modified_files_count == '0'
+        )
+        && (
+        !contains(format(',{0},', inputs.types), ',renamed,')
+        || steps.changed-files.outputs.renamed_files_count == '0'
+        )
+        )
       run: |
         . ./logging.sh
         log_info "No files found for classification"
