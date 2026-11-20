@@ -4,9 +4,8 @@
   "version": "v3.0.2",
   "commit_sha": "84dfcb183b5ad70af6506f75223e5b6783e9c7d4",
   "url": "https://github.com/fabasoad/nsfw-detection-action",
-  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "policy_sha": "374911c4be584df24e6da57af2d990570ef0f859",
   "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
   "test_agent_version": "2",
-  "harden_agent_version": "2",
-  "dependency_fingerprint": "sha256:7803b997f7425e6d03d8db86ca3e009c6b47b98fe056869850c9cb1373c070cd"
+  "harden_agent_version": "2"
 }
