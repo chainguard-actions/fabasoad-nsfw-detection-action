@@ -18,6 +18,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v3.0.0 | [`v3.0.0`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/tree/v3.0.0) | [`4dc1d32`](https://github.com/fabasoad/nsfw-detection-action/commit/4dc1d32529e338c6f997a4a285e4b7086ec501b6) | [`HARDENING.md`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/blob/v3.0.0/HARDENING.md) |
 | v3.0.1 | [`v3.0.1`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/tree/v3.0.1) | [`0765793`](https://github.com/fabasoad/nsfw-detection-action/commit/0765793ab34d8864d91bf36d9956dad979463eeb) | [`HARDENING.md`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/blob/v3.0.1/HARDENING.md) |
 | v3.0.2 | [`v3.0.2`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/tree/v3.0.2) | [`84dfcb1`](https://github.com/fabasoad/nsfw-detection-action/commit/84dfcb183b5ad70af6506f75223e5b6783e9c7d4) | [`HARDENING.md`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/blob/v3.0.2/HARDENING.md) |
+| v3.1.0 | [`v3.1.0`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/tree/v3.1.0) | [`d0be35a`](https://github.com/fabasoad/nsfw-detection-action/commit/d0be35aab488b7ca0d38d4e9eaee75ed3425a143) | [`HARDENING.md`](https://github.com/chainguard-actions/fabasoad-nsfw-detection-action/blob/v3.1.0/HARDENING.md) |
 
 ## Privacy
 
